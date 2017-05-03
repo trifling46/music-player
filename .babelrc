@@ -2,6 +2,6 @@
   "presets": [
     ["latest", {
       "es2015": { "modules": false }
-    }]
+    }],"stage-3"
   ]
 }

@@ -19,6 +19,16 @@ export default [
         component:resolve => require(["../modules/joke/joke-list.vue"],resolve),
     },
     {
+        name:"music-list",
+        path:"/music-list/:id/:title",
+        component:resolve => require(["../modules/music/music-list.vue"],resolve)
+    },
+    {
+        name:"music-play",
+        path:"/music-play/:index",
+        component:resolve => require(["../modules/music/music-play.vue"],resolve)
+    },
+    {
         path:"*",
         redirect:"/music"
     },
