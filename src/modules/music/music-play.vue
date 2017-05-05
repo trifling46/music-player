@@ -3,13 +3,18 @@
        <header-back :title="title"></header-back>
          <div class="music-bg">
              <div class="music-content">
-                 <div class="music-lyric"></div>
+                 <div class="music-lyric-bg">
+                     <div class="music-lyric" ref="lyric">
+                         <p v-for="(item,index) in musicLyric" class="lyric" v-text="item[1]" :data-time="item[0]"></p>
+                     </div>
+                 </div>
+
                   <div class="player">
                        <div class="bar">
                            <span class="cur-time" v-text="curTime"></span>
-                           <div class="progress-bar">
-                               <div class="cur-bar"></div>
-                               <i class="fa fa-circle pilot"  aria-hidden="true"></i>
+                           <div class="progress-bar" @click="moveProgress" ref="bar">
+                               <div class="cur-bar" ref="curBar"></div>
+                               <i class="fa fa-circle pilot" ref="pilot" aria-hidden="true"></i>
                            </div>
                            <span class="total-time" v-text="totalTime"></span>
                        </div>
@@ -38,11 +43,12 @@
     export  default{
         data(){
             return{
+                loopList:[],
             }
         },
         computed: {
             ...mapGetters([
-                "musicList","activeMusic","isPlay"
+                "musicList","activeMusic","isPlay","musicLyric","audio"
             ]),
             title(){
                 return this.activeMusic.author+"-"+this.activeMusic.name;
@@ -59,29 +65,72 @@
             headerBack
         },
         mounted: function () {
-            this.activeMusic;
             var  bg =  document.getElementsByClassName("music-bg")[0];
-            console.log(bg)
             bg.style.height = document.documentElement.clientHeight-55-40+'px';
+
             this.updateProgressBar();
+            this.autoUpdateLyricSite();
+            this.$store.commit("updateLoopList",{
+                loopList:this.loopList,
+            })
         },
         methods:{
             ...mapMutations([
-                "updateMusicList","updateMusicState"
+                "updateMusicList","updateMusicState","updateMusicCurTime","updateLoopList"
             ]),
+            autoUpdateLyricSite(){
+                if(this.musicLyric==undefined||this.musicLyric==null){
+                    return false;
+                }
+                var shifting = 200;
+                var index = 0;
+                var allLyricList = document.getElementsByClassName("lyric");
+
+                var autoUpdateLyricSite = setInterval(function(){
+
+                    if(this.audio.currentTime*1000>this.musicLyric[index+1][0]){
+                        allLyricList[index].className = "lyric";
+                        console.log(this.audio.currentTime*1000)
+                        index++;
+                        shifting -= 40;
+                        this.$refs.lyric.style.transform = "translateY("+shifting+"px)";
+                        allLyricList[index].className = "lyric activeLyric";
+                    }
+
+                }.bind(this),100);
+                this.loopList.push(autoUpdateLyricSite);
+
+            },
+            showLyric(){
+                this.musicLyric.forEach(function(e){
+
+                })
+            },
+            moveProgress(event){
+                var ratio =  (event.offsetX/this.$refs.bar.clientWidth);
+                var curTime = parseInt(ratio*this.activeMusic.totalTime);
+                this.updateProgress(ratio,curTime);
+                this.$store.commit("updateMusicCurTime",{
+                    musicCurTime:curTime,
+                })
+            },
             updateProgressBar(){
-                var progressDom = document.getElementsByClassName("cur-bar")[0];
-                var pilotDom = document.getElementsByClassName("pilot")[0];
-                setInterval(function () {
+               var updateProgressBar =  setInterval(function () {
                     var curTime =  this.activeMusic.curTime + 1000;
                     var ratio = parseInt(curTime/1000)/parseInt(this.activeMusic.totalTime/1000);
-                    var percent = (ratio*100).toFixed(2);
-                    progressDom.style.width = percent +"%";
-                    pilotDom.style.left = percent +"%";
-                    this.$store.commit("updateActiveMusicCurTime",{
-                        curTime
-                    })
+                    this.updateProgress(ratio,curTime);
                 }.bind(this),1000)
+                this.loopList.push(updateProgressBar);
+            },
+            updateProgress(ratio,curTime){
+                var progressDom = this.$refs.curBar;
+                var pilotDom = this.$refs.pilot;
+                var percent = (ratio*100).toFixed(2);
+                progressDom.style.width = percent +"%";
+                pilotDom.style.left = percent +"%";
+                this.$store.commit("updateActiveMusicCurTime",{
+                    curTime
+                })
             },
             getTime(time){
                 var  virtualMinute = parseInt(time/1000/60);
@@ -103,6 +152,11 @@
             },
 
         },
+        watch:{
+            musicLyric(newVal,oldVal){
+                this.autoUpdateLyricSite();
+            }
+        }
 
     }
 </script>
@@ -142,7 +196,7 @@
                              left:0px;
                              display: inline-block;
                              height:100%;
-                             width:10%;
+                             width:0%;
                              background:#31C27C;
                              position:absolute;
                              z-index:2;
@@ -151,7 +205,7 @@
                         position: absolute;
                         z-index: 5;
                         bottom: -5px;
-                        left: 0px;
+                        left: -6px;
 
                     }
                 }
@@ -181,10 +235,30 @@
             }
 
         }
-    .music-lyric{
+    .music-lyric-bg{
         background:#38393A;
         height:60%;
         width:100%;
+        color:#ffffff;
+        font-size:16px;
+        overflow: hidden;
+        .music-lyric{
+            transform: translateY(200px);
+            transition:translateY 2s;
+            &>p{
+                text-align: center;
+                padding: 5px 0px;
+                height:30px;
+                line-height: 30px;
+                transition:color 1s;
+            }
+            .activeLyric{
+                color:#31C27C;
+                transform: scale(1.1);
+                font-weight:bold;
+            }
+
+        }
 
     }
     }

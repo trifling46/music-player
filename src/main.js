@@ -17,7 +17,7 @@ Vue.use(VueAxios, axios)
 var router = new VueRouter({
     routes,
 });
-new Vue({
+var vm = new Vue({
   el: '#app',
     router,
     store,

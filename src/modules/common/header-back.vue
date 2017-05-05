@@ -9,11 +9,17 @@
 </template>
 
 <script>
+    import {mapGetters} from "vuex"
     export  default{
         data(){
             return{
 
             }
+        },
+        computed: {
+            ...mapGetters([
+                "musicList", "activeMusic", "isPlay", "musicLyric", "loopList"
+            ]),
         },
         props: {
             title: {
@@ -23,6 +29,9 @@
         },
         methods:{
             back(){
+                this.loopList.forEach(function(e){
+                    clearInterval(e);
+                })
                 this.$router.back()
             }
 

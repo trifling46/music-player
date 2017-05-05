@@ -20,61 +20,70 @@
         name: 'app',
         data () {
             return {
-                'item_title':"lsl"
+                'item_title': "lsl"
             }
         },
         computed: {
             ...mapGetters([
-                 "activeMusic","activeMusicList","isPlay"
+                "activeMusic", "activeMusicList", "isPlay", "musicCurTime"
             ]),
         },
-        mounted(){
-            this.$refs.audio.addEventListener("error",function () {
+        mounted:function(){
+            console.log(this.$refs.music);
+            this.$refs.music.addEventListener("error", function () {
                 this.changeMusic(global.NEXT);
-            });
-            this.$refs.audio.addEventListener("ended",function () {
+            }.bind(this));
+            this.$refs.music.addEventListener("ended", function () {
                 this.changeMusic(global.NEXT);
-            });
+            }.bind(this));
+            this.$refs.music.addEventListener("play", function () {
+                console.log("play")
+            }.bind(this));
+            this.$store.commit("updateAudio",{
+                audio:this.$refs.music
+            })
         },
-        components:{
+        components: {
             pageFooter,
         },
-        methods:{
+        methods: {
             ...mapMutations([
-               "updateActiveMusic","updateMusicState"
+                "updateActiveMusic", "updateMusicState","updateAudio"
             ]),
             changeTitle(payload){
-                this.item_title = payload.title ;
+                this.item_title = payload.title;
             },
             changeMusic(type){
-                this.$store.commit("changeActiveMusic",{
-                    type
+                this.$store.commit("updateActiveMusic", {
+                    type:global.NEXT,
+                    index:this.activeMusic.index
                 });
             },
             playMusic(isPlay){
-                if(isPlay){
+                if (isPlay) {
                     setTimeout(function () {
                         this.$refs.music.play();
-                    }.bind(this),100)
+                    }.bind(this), 100)
                 }
-                else{
+                else {
                     this.$refs.music.pause();
                 }
             },
         },
-        mounted:function(){
-            console.log(this.$refs.music.paused)
-        },
 
-        watch:{
-            activeMusic(newVal,oldVal){
-                this.$refs.music.load();
+        watch: {
+            activeMusic(newVal, oldVal){
                 this.playMusic(true);
             },
-            isPlay(newVal,oldVal){
-                this.playMusic(newVal);
-             }
+            musicCurTime(newVal, oldVal){
+                console.log(newVal)
+                this.$refs.music.currentTime = newVal/1000;
             },
+            isPlay(newVal, oldVal){
+                this.playMusic(newVal);
+            },
+
+        }
     }
 </script>
 

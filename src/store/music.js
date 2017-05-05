@@ -16,6 +16,10 @@ const state ={
         curTime:0, //单位是毫秒
     },
     isPlay:false,
+    musicCurTime:0,
+    musicLyric:null,
+    audio:null,
+    loopList:[],
 }
 const getters = {
     musicList(state){
@@ -29,19 +33,44 @@ const getters = {
     },
     activeMusic(state){
         return state.activeMusic;
-    }
+    },
+    musicCurTime(state){
+        return state.musicCurTime;
+    },
+    musicLyric(state){
+        return state.musicLyric;
+    },
+    audio(state){
+        return state.audio;
+    },
+    loopList(state){
+        return state.loopList;
+    },
+
 
 
 }
 const mutations = {
+    updateAudio(state,payload){
+        state.audio = payload.audio;
+    },
+    updateLoopList(state,payload){
+        state.loopList = payload.loopList;
+    },
     updateMusicList(state,payload){
          state.musicList = payload.musicList;
     },
     updateActiveMusicList(state,payload){
         state.activeMusicList = payload.activeMusicList;
     },
+    updateMusicCurTime(state,payload){
+      state.musicCurTime = payload.musicCurTime;
+    },
     updateMusicState(state,payload){
         state.isPlay = payload.isPlay;
+    },
+    updateMusicLyric(state,payload){
+        state.musicLyric = payload.musicLyric;
     },
     updateActiveMusic(state,payload){
         var type = payload.type;
