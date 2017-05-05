@@ -4,7 +4,7 @@
       <mt-button slot="left"><i class="fa fa-bars" aria-hidden="true"></i></mt-button>
       <mt-button slot="right"><i class="fa fa-sign-out" aria-hidden="true"></i></mt-button>
     </mt-header>
-    <div class="content">
+    <div class="content" ref="content">
       <router-view></router-view>
     </div>
     <audio  :src="activeMusic.src" ref="music"></audio>
@@ -28,20 +28,12 @@
                  "activeMusic","activeMusicList","isPlay"
             ]),
         },
-        mounted(){
-            this.$refs.audio.addEventListener("error",function () {
-                this.changeMusic(global.NEXT);
-            });
-            this.$refs.audio.addEventListener("ended",function () {
-                this.changeMusic(global.NEXT);
-            });
-        },
         components:{
             pageFooter,
         },
         methods:{
             ...mapMutations([
-               "updateActiveMusic","updateMusicState"
+               "updateActiveMusic","updateMusicState","updateContentHeight"
             ]),
             changeTitle(payload){
                 this.item_title = payload.title ;
@@ -63,7 +55,12 @@
             },
         },
         mounted:function(){
-            console.log(this.$refs.music.paused)
+            var height = document.documentElement.clientHeight-95;  // 上下nav高度
+            this.$refs.content.style.height = height+'px'; // 上下nav高度
+            this.$store.commit("updateContentHeight",{
+                contentHeight:height,
+            });
+            console.log(  this.$refs.content.style.height);
         },
 
         watch:{
@@ -81,7 +78,8 @@
 <style lang="less">
   .content{
     box-sizing: border-box;
-    padding:40px 0px 55px 0px;
+    margin: 40px 0px 55px 0px;
+    overflow-y: scroll;
   }
   .custom{
     background:red;

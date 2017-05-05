@@ -29,6 +29,11 @@ export default [
         component:resolve => require(["../modules/music/music-play.vue"],resolve)
     },
     {
+        name:"picture-detail",
+        path:"/picture-detail/:index",
+        component:resolve => require(["../modules/picture/picture-detail.vue"],resolve)
+    },
+    {
         path:"*",
         redirect:"/music"
     },
