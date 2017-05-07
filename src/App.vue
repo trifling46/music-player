@@ -4,7 +4,7 @@
       <mt-button slot="left"><i class="fa fa-bars" aria-hidden="true"></i></mt-button>
       <mt-button slot="right"><i class="fa fa-sign-out" aria-hidden="true"></i></mt-button>
     </mt-header>
-    <div class="content">
+    <div class="content" ref="content">
       <router-view></router-view>
     </div>
     <audio  :src="activeMusic.src" ref="music"></audio>
@@ -25,7 +25,7 @@
         },
         computed: {
             ...mapGetters([
-                "activeMusic", "activeMusicList", "isPlay", "musicCurTime"
+                "activeMusic", "activeMusicList", "isPlay", "musicCurTime",
             ]),
         },
         mounted:function(){
@@ -42,19 +42,25 @@
             this.$store.commit("updateAudio",{
                 audio:this.$refs.music
             })
+            var height = document.documentElement.clientHeight-95;  // 上下nav高度
+            this.$refs.content.style.height = height+'px'; // 上下nav高度
+            this.$store.commit("updateContentHeight",{
+                contentHeight:height,
+            });
+            console.log(  this.$refs.content.style.height);
         },
         components: {
             pageFooter,
         },
         methods: {
             ...mapMutations([
-                "updateActiveMusic", "updateMusicState","updateAudio"
+                "updateActiveMusic", "updateMusicState","updateAudio","updateContentHeight"
             ]),
             changeTitle(payload){
                 this.item_title = payload.title;
             },
             changeMusic(type){
-                this.$store.commit("updateActiveMusic", {
+                this.$store.dispatch("updateActiveMusic", {
                     type:global.NEXT,
                     index:this.activeMusic.index
                 });
@@ -90,10 +96,13 @@
 <style lang="less">
   .content{
     box-sizing: border-box;
-    padding:40px 0px 55px 0px;
+    margin: 40px 0px 55px 0px;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
   .custom{
     background:red;
   }
+
 
 </style>

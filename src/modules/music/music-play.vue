@@ -2,8 +2,10 @@
     <div class="music-play">
        <header-back :title="title"></header-back>
          <div class="music-bg">
+             <img class="img-bg" :src="activeMusic.pic" alt="">
              <div class="music-content">
-                 <div class="music-lyric-bg">
+                 <div class="music-lyric-bg" >
+                     <img :src="activeMusic.pic" alt="">
                      <div class="music-lyric" ref="lyric">
                          <p v-for="(item,index) in musicLyric" class="lyric" v-text="item[1]" :data-time="item[0]"></p>
                      </div>
@@ -44,11 +46,13 @@
         data(){
             return{
                 loopList:[],
+                musicLyricLine:0,
+                shifting:150,//歌词初始偏移量
             }
         },
         computed: {
             ...mapGetters([
-                "musicList","activeMusic","isPlay","musicLyric","audio"
+                "musicList","activeMusic","isPlay","musicLyric","audio","musicTotalTime"
             ]),
             title(){
                 return this.activeMusic.author+"-"+this.activeMusic.name;
@@ -57,9 +61,8 @@
                 return this.getTime(this.activeMusic.curTime);
             },
             totalTime(){
-                return this.getTime(this.activeMusic.totalTime);
+                return this.getTime(this.musicTotalTime)
             }
-
         },
         components: {
             headerBack
@@ -67,59 +70,113 @@
         mounted: function () {
             var  bg =  document.getElementsByClassName("music-bg")[0];
             bg.style.height = document.documentElement.clientHeight-55-40+'px';
-
-            this.updateProgressBar();
-            this.autoUpdateLyricSite();
-            this.$store.commit("updateLoopList",{
-                loopList:this.loopList,
+            this.audio.addEventListener("canplaythrough",function(){
+                var musicTotalTime = this.audio.duration*1000 ;
+                this.$store.commit("updateMusicTotalTime",{
+                    musicTotalTime
+                })
+            }.bind(this))
+        },
+        destroyed:function () {
+                this.loopList.forEach(function(e){
+                    clearInterval(e);
+                })
+                this.$store.commit("updateLoopList",{
+                    loopList:[],
             })
         },
         methods:{
             ...mapMutations([
-                "updateMusicList","updateMusicState","updateMusicCurTime","updateLoopList"
+                "updateMusicList","updateMusicState","updateMusicCurTime","updateLoopList","updateMusicTotalTime"
             ]),
+            initThread(){
+                this.updateProgressBar();
+                this.autoUpdateLyricSite();
+                this.$store.commit("updateLoopList",{
+                    loopList:this.loopList,
+                })
+            },
+            closeThread(){
+                this.loopList.forEach(function(e){
+                    clearInterval(e);
+                });
+                this.$store.commit("updateLoopList",{
+                    loopList:[],
+                })
+            },
+            // 默认正常播放 type = FF
             autoUpdateLyricSite(){
                 if(this.musicLyric==undefined||this.musicLyric==null){
                     return false;
                 }
-                var shifting = 200;
-                var index = 0;
                 var allLyricList = document.getElementsByClassName("lyric");
-
                 var autoUpdateLyricSite = setInterval(function(){
-
-                    if(this.audio.currentTime*1000>this.musicLyric[index+1][0]){
-                        allLyricList[index].className = "lyric";
-                        console.log(this.audio.currentTime*1000)
-                        index++;
-                        shifting -= 40;
-                        this.$refs.lyric.style.transform = "translateY("+shifting+"px)";
-                        allLyricList[index].className = "lyric activeLyric";
-                    }
-
-                }.bind(this),100);
+                      if (this.musicLyricLine + 1 < this.musicLyric.length && this.audio.currentTime*1000> this.musicLyric[this.musicLyricLine + 1][0]) {
+                          allLyricList[this.musicLyricLine].className = "lyric";
+                          this.musicLyricLine++;
+                          console.log("auto: "+this.musicLyricLine)
+                          this.shifting -= 40;
+                          this.$refs.lyric.style.transform = "translateY(" + this.shifting  + "px)";
+                          allLyricList[this.musicLyricLine].className = "lyric activeLyric";
+                      }
+                }.bind(this),200);
                 this.loopList.push(autoUpdateLyricSite);
-
-            },
-            showLyric(){
-                this.musicLyric.forEach(function(e){
-
-                })
             },
             moveProgress(event){
                 var ratio =  (event.offsetX/this.$refs.bar.clientWidth);
-                var curTime = parseInt(ratio*this.activeMusic.totalTime);
+                var curTime = parseInt(ratio*this.musicTotalTime);
                 this.updateProgress(ratio,curTime);
+
                 this.$store.commit("updateMusicCurTime",{
                     musicCurTime:curTime,
                 })
+                this.updateMusicLyricLine(curTime);
+
+            },
+            updateMusicLyricLine(curTime){
+                this.musicLyric.some (function (item,index) {
+                    if(item[0]>curTime){
+
+                        var allLyricList = document.getElementsByClassName("lyric");
+                        this.closeThread();
+                        allLyricList[this.musicLyricLine].className = "lyric";
+                        allLyricList[index].className = "lyric activeLyric";
+
+                        if(curTime>this.audio.currentTime*1000){
+                            var sliderLyricNext = setInterval(function(){
+                                this.musicLyricLine++;
+                                console.log("hand: "+this.musicLyricLine)
+                                if(this.musicLyricLine>=index){
+                                    clearInterval(sliderLyricNext);
+                                    this.initThread();
+                                }
+                                this.shifting -= 40;
+                                this.$refs.lyric.style.transform = "translateY(" +  this.shifting  + "px)";
+                            }.bind(this),50);
+                        }
+                        else{
+                            var sliderLyricPre = setInterval(function(){
+                                this.musicLyricLine--;
+                                if(this.musicLyricLine<=index){
+                                    clearInterval(sliderLyricPre);
+                                    this.initThread();
+                                }
+                                this.shifting += 40;
+                                this.$refs.lyric.style.transform = "translateY(" +  this.shifting  + "px)";
+                            }.bind(this),50);
+                        }
+
+
+                        return true;
+                    }
+                }.bind(this))
             },
             updateProgressBar(){
                var updateProgressBar =  setInterval(function () {
-                    var curTime =  this.activeMusic.curTime + 1000;
-                    var ratio = parseInt(curTime/1000)/parseInt(this.activeMusic.totalTime/1000);
+                    var curTime =  this.audio.currentTime*1000;
+                    var ratio = parseInt(curTime/1000)/parseInt(this.musicTotalTime/1000);
                     this.updateProgress(ratio,curTime);
-                }.bind(this),1000)
+                }.bind(this),500)
                 this.loopList.push(updateProgressBar);
             },
             updateProgress(ratio,curTime){
@@ -145,7 +202,10 @@
              })
             },
             updateActiveMusic(type){
-                this.$store.commit("updateActiveMusic",{
+                this.closeThread();
+                this.musicLyricLine = 0 ;
+                this.shifting = 150;
+                this.$store.dispatch("updateActiveMusic",{
                     type,
                     index:this.activeMusic.index
                 });
@@ -154,8 +214,13 @@
         },
         watch:{
             musicLyric(newVal,oldVal){
-                this.autoUpdateLyricSite();
-            }
+                this.musicLyricLine = 0 ;
+                this.shifting = 150;
+                this.initThread();
+            },
+            musicTotalTime(newVal,oldVal){
+                console.log(newVal,oldVal)
+            },
         }
 
     }
@@ -168,6 +233,15 @@
             width:100%;
             padding: 10px 0px;
             box-sizing: border-box;
+            .img-bg{
+                width:100%;
+                height:100%;
+                opacity: 0.2;
+                position: absolute;
+                top:0px;
+                left:0px;
+                transform: scale(5);
+            }
             .music-content{
                     width:90%;
                     height:100%;
@@ -175,7 +249,7 @@
                      box-shadow: 0 0 10px 0 #2a2c33;
             }
             .player{
-               margin-top:50px;
+               margin-top:10%;
               .bar{
                 color:#ffffff;
                 font-size:14px;
@@ -190,7 +264,7 @@
                     height:5px;
                     background:#757575;
                     position:relative;
-                    margin:0px 10px;
+                    margin:0px 15px;
                          .cur-bar{
                              top:0px;
                              left:0px;
@@ -215,6 +289,7 @@
                     display: flex;
                     justify-content: space-around;
                     align-items: center;
+                    position: relative;
                     &>div{
                         border-radius: 50px;
                         height:50px;
@@ -236,25 +311,33 @@
 
         }
     .music-lyric-bg{
-        background:#38393A;
+       /* background:#38393A;*/
+        background-size:cover;
         height:60%;
         width:100%;
         color:#ffffff;
-        font-size:16px;
+        font-size:14px;
         overflow: hidden;
+        position: relative;
+        img{
+            max-width:100%;
+            max-width:100%;
+            opacity: 0.8;
+            position: absolute;
+        }
         .music-lyric{
-            transform: translateY(200px);
+            transform: translateY(150px);
             transition:translateY 2s;
             &>p{
                 text-align: center;
                 padding: 5px 0px;
-                height:30px;
+                min-height:30px;
                 line-height: 30px;
                 transition:color 1s;
             }
             .activeLyric{
                 color:#31C27C;
-                transform: scale(1.1);
+                transform: scale(1.2);
                 font-weight:bold;
             }
 

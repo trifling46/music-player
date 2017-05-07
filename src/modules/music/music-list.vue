@@ -27,6 +27,7 @@
   import loading from "../common/loading.vue"
   import {mapMutations} from "vuex"
   import {mapGetters} from "vuex"
+  import {mapActions} from "vuex"
 
     export  default{
         data(){
@@ -53,6 +54,9 @@
         methods:{
             ...mapMutations([
                 "updateMusicList","updateActiveMusic","updateActiveMusicList","updateMusicState"
+            ]),
+            ...mapActions([
+                "updateActiveMusic"
             ]),
             getList(id){
                 this.axios.get(REMOTE_PROXY+'http://music.163.com/api/playlist/detail?id='+id)
@@ -87,49 +91,16 @@
                     activeMusicList:this.musicList
                 })
                 var music = this.musicList[index];
-                this.$store.commit("updateActiveMusic",{
+                this.$store.dispatch("updateActiveMusic",{
                    type:global.CURRENT,
                    index
                 })
                 this.$store.commit("updateMusicState",{
                     isPlay:true,
                 })
-              this.getLyric(this.activeMusic.id);
-
                this.$router.push({name:"music-play",params:{index:index}})
             },
-            getLyric(songId){
-                this.axios.get(REMOTE_PROXY+'http://music.163.com/api/song/lyric?os=pc&lv=-1&kv=-1&tv=-1&id='+songId)
-                    .then(function (res) {
-                        if (res.data.nolyric) {
-                            return false;
-                        }
-                        else{
-                            var allLyricList = [];
-                            var lyric = res.data.lrc.lyric;
-                            var regexLyric = new RegExp("\n");
-                            var list = lyric.split(regexLyric);
-                                list.pop();
-                            var regexItem = new RegExp("\]")
-                            list.forEach(function(e){
-                                    var item = e.split(regexItem);
-                                    // var time1 = item[0].replace('[','')  格式化时间
-                                    var timeList = item[0].replace('[','').split(":");
-                                    var Millisecond = timeList[0]*60*1000+timeList[1]*1000 //毫秒时间
-                                    item[0] = Millisecond;
-                                    if(item[1].length!=0){
-                                        allLyricList.push(item);
-                                    }
-                            })
-                            this.$store.commit("updateMusicLyric",{
-                                musicLyric:allLyricList
-                            })
-                        }
-                    }.bind(this))
-                    .catch(function(error){
-                       console.log(error)
-                    })
-            },
+
 
         }
     }

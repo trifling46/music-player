@@ -10,6 +10,7 @@
 
 <script>
     import {mapGetters} from "vuex"
+    import {mapMutations} from "vuex"
     export  default{
         data(){
             return{
@@ -28,10 +29,10 @@
             }
         },
         methods:{
+            ...mapMutations([
+                "updateLoopList"
+            ]),
             back(){
-                this.loopList.forEach(function(e){
-                    clearInterval(e);
-                })
                 this.$router.back()
             }
 

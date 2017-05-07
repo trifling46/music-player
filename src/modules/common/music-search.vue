@@ -57,7 +57,8 @@
             },
             getList(){
                 this.isLoading = true;
-                this.axios.get(REMOTE_PROXY+'http://s.music.163.com/search/get?type=1&s='+this.searchQuery)
+                var n = 100;
+                this.axios.get(global.REMOTE_PROXY+'http://s.music.163.com/search/get?type=1&s='+this.searchQuery)
                     .then(function (res) {
                         var soneList = res.data.result.songs ;
                         var musicList = [];
@@ -68,6 +69,7 @@
                             music.author = e.artists[0].name;
                             music.src = e.audio;
                             music.pic =e.album.picUrl;
+                            music.totalTime = e.duration;
                             musicList.push(music);
                         })
                         this.isLoading = false;

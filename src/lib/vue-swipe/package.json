@@ -1,0 +1,124 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "vue-swipe",
+        "scope": null,
+        "escapedName": "vue-swipe",
+        "name": "vue-swipe",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "G:\\vue\\workspace\\music-player"
+    ]
+  ],
+  "_from": "vue-swipe@latest",
+  "_id": "vue-swipe@2.0.3",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/vue-swipe",
+  "_nodeVersion": "6.6.0",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/vue-swipe-2.0.3.tgz_1489671048851_0.7085842804517597"
+  },
+  "_npmUser": {
+    "name": "yi.yang",
+    "email": "leopoldthecuber@gmail.com"
+  },
+  "_npmVersion": "3.10.3",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "vue-swipe",
+    "scope": null,
+    "escapedName": "vue-swipe",
+    "name": "vue-swipe",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/vue-swipe/-/vue-swipe-2.0.3.tgz",
+  "_shasum": "03b71d04a819b5f56efa09cd82658c30e8c846c5",
+  "_shrinkwrap": null,
+  "_spec": "vue-swipe",
+  "_where": "G:\\vue\\workspace\\music-player",
+  "author": {
+    "name": "long.zhang@ele.me"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  },
+  "bugs": {
+    "url": "https://github.com/ElemeFE/vue-swipe/issues"
+  },
+  "dependencies": {
+    "wind-dom": "0.0.3"
+  },
+  "description": "A touch slider for vue.js.",
+  "devDependencies": {
+    "babel-cli": "^6.3.15",
+    "babel-core": "^6.3.15",
+    "babel-loader": "^6.2.0",
+    "babel-plugin-transform-runtime": "^6.3.13",
+    "babel-preset-es2015": "^6.3.13",
+    "css-loader": "^0.23.1",
+    "eslint": "^1.10.3",
+    "eslint-loader": "^1.1.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.8.5",
+    "style-loader": "^0.13.0",
+    "url-loader": "^0.5.7",
+    "vue": "2.1.8",
+    "vue-hot-reload-api": "^1.2.2",
+    "vue-html-loader": "^1.0.0",
+    "vue-loader": "10.0.2",
+    "vue-template-compiler": "^2.1.8",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "03b71d04a819b5f56efa09cd82658c30e8c846c5",
+    "tarball": "https://registry.npmjs.org/vue-swipe/-/vue-swipe-2.0.3.tgz"
+  },
+  "gitHead": "c2e56612b134688eefa97fbc638344eba5938ee3",
+  "homepage": "https://github.com/ElemeFE/vue-swipe#readme",
+  "keywords": [
+    "swipe",
+    "slider",
+    "vue"
+  ],
+  "license": "MIT",
+  "main": "dist/vue-swipe.js",
+  "maintainers": [
+    {
+      "name": "gogu",
+      "email": "gogu9909@gmail.com"
+    },
+    {
+      "name": "long.zhang",
+      "email": "long.zhang@me.com"
+    }
+  ],
+  "name": "vue-swipe",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElemeFE/vue-swipe.git"
+  },
+  "scripts": {
+    "build": "webpack -p",
+    "dev": "webpack-dev-server --config ./webpack.example.config.js --inline --hot",
+    "prepublish": "npm run build",
+    "remote-dev": "npm run dev --host"
+  },
+  "version": "2.0.3"
+}
